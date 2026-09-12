@@ -55,9 +55,9 @@ Importance answers one question only: how often should we proactively reach out?
 | 4 | Good | quarterly |
 | 3 | Medium | every 6 months |
 | 2 | Low | yearly |
-| 1 | Lowest — no outreach needed | never (explicit opt-out) |
+| 1 | Lowest — no outreach needed | never. Only for people who will never work with us in any role: auditors, cold pitches, engagements that ended badly. "Quiet" is a 2, not a 1. |
 
-Rules of thumb: Decision Maker at a Prospect with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. A POC we only talk to inside a project, or a Decision Maker at a settled Past Customer, is honestly a 1. Every person with a `relationship` must have an importance; ignored people default to 1. A blank importance is a defect.
+Rules of thumb: Decision Maker at a Prospect with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. Decision Maker at a Past Customer or Past Lead = 2 at minimum; they might come back. A POC we only talked to inside a project can be 1 if the decision maker at that account carries the reconnect; ignored people are 1. Every person with a `relationship` must have an importance; ignored people default to 1. A blank importance is a defect.
 
 History: until 11 Sep 2026 the scale ran 1–8, with 6 = "potential lead, ongoing", 7 = "Client POC, no interaction" and 8 = "Past client, no interaction". Those were retired because they duplicated `relationship`. Migration: 6 → 5, 7 and 8 → 1. Note: deleting a select option in Attio blanks the value on every record that had it — archive instead of delete.
 
@@ -69,6 +69,7 @@ The company's `account_type` sets a floor; importance can only make outreach mor
 |---|---|
 | Decision Makers at a Customer | at least monthly |
 | Decision Makers at a Past Customer | at least every 6 months |
+| Decision Makers at a Past Lead | at least yearly |
 | Importance 5 | monthly |
 | Importance 4 | quarterly |
 | Importance 3 | every 6 months |
@@ -131,7 +132,7 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 
 ## Changelog
 
-- 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2; ignored people default to importance 1 (78 backfilled). Backlog sweep added (7.7): the ~11,700 never-classified people are reviewed individually, not bulk-ignored. Account status changes are propose-only.
+- 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2; ignored people default to importance 1 (78 backfilled). Backlog sweep added (7.7): the ~11,700 never-classified people are reviewed individually, not bulk-ignored. Account status changes are propose-only. Importance 1 narrowed to "will never work with us"; Past Lead decision makers get a yearly floor.
 - 0.4 (11 Sep 2026): importance simplified to 1–5 (6/7/8 retired, 1 renamed "No outreach needed"); cadence rule rewritten as relationship-floor + importance; task rule now applies at importance ≥ 2. All 50 non-ignored people with a relationship but no importance were scored the same day; 91 ignored blanks left alone.
 - 0.3 (11 Sep 2026): triage may enrich phone / title / LinkedIn from the person's own email signature (7.6).
 - 0.2 (11 Sep 2026): added reconnect cadence by relationship/importance (3a) and the 30-day re-review rule (3b); triage step 1–2 updated accordingly.
