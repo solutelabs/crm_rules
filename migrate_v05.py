@@ -34,11 +34,18 @@ def api(method, path, body=None):
                                  data=json.dumps(body).encode() if body else None,
                                  headers={"Authorization": f"Bearer {token()}",
                                           "Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req) as r:
-            return json.load(r)
-    except urllib.error.HTTPError as e:
-        sys.exit(f"{method} {path} -> {e.code}: {e.read().decode()[:400]}")
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < 2:
+                time.sleep(2 ** attempt); continue
+            sys.exit(f"{method} {path} -> {e.code}: {e.read().decode()[:400]}")
+        except (urllib.error.URLError, TimeoutError, OSError) as e:  # stalled socket: retry
+            print(f"  retry {attempt + 1} {method} {path}: {e}", flush=True)
+            time.sleep(2 ** attempt)
+    sys.exit(f"{method} {path}: gave up after 3 attempts")
 
 
 def options():
