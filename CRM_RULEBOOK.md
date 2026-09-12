@@ -1,34 +1,49 @@
 # SoluteLabs CRM Rulebook (Attio)
 
-Version 0.4 — 11 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
+Version 0.5 — 12 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
 
 ## 1. Who gets a record
 
 Attio auto-creates a person for every email participant. That is fine; the job is to classify, not to prune.
 
-Every person record must end in exactly one of two states within a day of first appearing: **classified** (a `relationship` value set) or **ignored** (`ignore` = true). Nothing stays blank.
+Every person record must end in exactly one of two states within a day of first appearing: **classified** (a `relationship` value set, and the company's `account_type` set) or **ignored** (`ignore` = true). Nothing stays blank.
+
+`ignore` means "the triage routine never surfaces this person and nobody reaches out". It is not a softer "low priority" — that is importance 1. A person with `ignore` = true and importance ≥ 2 is a defect. The only relationship that is normally also ignored is Vendor (section 2).
 
 Internal addresses (`@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`) are always `ignore`.
 
-## 2. Relationship values and when to use them
+## 2. Relationship and account status
+
+Two fields, two questions. **Who is this person to their company?** lives on the person as `relationship`. **What is that company to us?** lives on the company as `account_type`. Neither field repeats the other. When a client goes quiet or a prospect signs, change the company's `account_type` once; nobody re-tags people.
+
+### 2a. Person `relationship` — the person's role
 
 | Value | Use when |
 |---|---|
-| Client - Founder / Owner | Founder, owner or exec sponsor at a company we are currently billing. |
-| Client POC | Day-to-day contact (PM, IT manager, ops) at a current client. |
-| Past Client | Founder/owner at a company we billed before but not in the last ~6 months and no live scope. |
-| Past client POC | Day-to-day contact at a past client. |
-| Future Prospect | Anyone we have had a real two-way conversation with about possible work — inbound leads, referrals, outbound that replied. |
-| Past Lead | A prospect that went cold or said no; keep only if worth a yearly ping. |
-| Referrer | Someone who introduces us to work (partners, ex-clients, Google/AWS partner managers). |
-| Vendor POC | A supplier we actually use (CodeVyasa, TechMonarch, Growfusely, accountants). Also set `ignore` = true unless someone owns the vendor relationship. |
-| CWX POC | Cloudwerx-specific partner contacts. |
+| Decision Maker | Founder, owner, C-level, MD, director or exec sponsor — the person who can say yes to work or budget. |
+| POC | Day-to-day contact: PM, engineering lead, IT manager, ops, finance staff. Talks to us inside a project or a deal but doesn't sign. |
+| Partner | Works at a company we co-sell or subcontract with (Cloudwerx, Google/AWS partner managers, agencies that pass us work). |
+| Referrer | An individual who introduces us to work in a personal capacity — ex-clients, friends, investors, founders we know. Not a company relationship. |
+| Vendor | A supplier we use (CodeVyasa, TechMonarch, Growfusely, accountants) or an external contractor on a client's side. Also `ignore` = true unless someone owns the vendor relationship. |
 
 Vendor colleagues, cold pitches, recruiters, newsletters, SaaS notifications, event/sponsorship sales, M&A/valuation outreach, "co-founder wanted" mails: `ignore` = true, no relationship needed. Add a one-line `description` saying what the pitch was and the month, so nobody re-investigates.
 
+### 2b. Company `account_type` — the account's status
+
+| Value | Use when |
+|---|---|
+| Customer | We are currently billing them or have live scope. |
+| Past Customer | We billed them before; no invoice or live scope in the last ~6 months. |
+| Prospect | A real two-way conversation about possible work is open or paused with a date. |
+| Past Lead | A prospect that went cold or said no; keep only if worth a yearly ping. |
+| Partner | Co-selling or subcontracting partner. |
+| Vendor | A supplier. |
+
+Every company that has at least one classified person must have an `account_type`. A classified person at a company with a blank `account_type` is a defect. A person with no company (personal email, no employer known) gets a company record created from what we know, or stays `ignore`.
+
 ## 3. Importance (1–5) — how often we reach out
 
-Importance answers one question only: how often should we proactively reach out? Who the person is lives in `relationship`, not here.
+Importance answers one question only: how often should we proactively reach out? Who the person is lives in `relationship` and `account_type`, not here.
 
 | Score | Label | Cadence |
 |---|---|---|
@@ -38,29 +53,29 @@ Importance answers one question only: how often should we proactively reach out?
 | 2 | Low | yearly |
 | 1 | Lowest — no outreach needed | never (explicit opt-out) |
 
-Rules of thumb: inbound lead with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. A delivery POC we only talk to inside a project, or a settled past client, is honestly a 1. Every non-ignored person with a `relationship` must have an importance; a blank importance is a defect.
+Rules of thumb: Decision Maker at a Prospect with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. A POC we only talk to inside a project, or a Decision Maker at a settled Past Customer, is honestly a 1. Every non-ignored person with a `relationship` must have an importance; a blank importance is a defect.
 
-History: until 11 Sep 2026 the scale ran 1–8, with 6 = "potential lead, ongoing", 7 = "Client POC, no interaction" and 8 = "Past client, no interaction". Those were retired because they duplicated `relationship`. Migration: 6 → 5, 7 and 8 → 1. Note: deleting a select option in Attio blanks the value on every record that had it — archive instead of delete next time.
+History: until 11 Sep 2026 the scale ran 1–8, with 6 = "potential lead, ongoing", 7 = "Client POC, no interaction" and 8 = "Past client, no interaction". Those were retired because they duplicated `relationship`. Migration: 6 → 5, 7 and 8 → 1. Note: deleting a select option in Attio blanks the value on every record that had it — archive instead of delete.
 
 ### 3a. Reconnect cadence
 
-Relationship sets a floor; importance can only make outreach more frequent; 1 is the explicit opt-out. When a person's last interaction is older than their cadence, the triage routine proposes a reconnect task (and an email angle).
+The company's `account_type` sets a floor; importance can only make outreach more frequent; 1 is the explicit opt-out. When a person's last interaction is older than their cadence, the triage routine proposes a reconnect task (and an email angle).
 
 | Who | Reconnect every |
 |---|---|
-| Existing clients (Client - Founder / Owner, Client POC) | at least monthly |
-| Past clients (Past Client, Past client POC) | at least every 6 months |
+| Decision Makers at a Customer | at least monthly |
+| Decision Makers at a Past Customer | at least every 6 months |
 | Importance 5 | monthly |
 | Importance 4 | quarterly |
 | Importance 3 | every 6 months |
 | Importance 2 | yearly |
-| Importance 1, or `ignore` | never — even if the relationship floor would say otherwise |
+| Importance 1, or `ignore` | never — even if the account floor would say otherwise |
 
-The shorter of the relationship floor and the importance interval applies, except that 1 always wins. The reconnect task goes to the thread owner (section 5) with the cadence date as its deadline.
+The shorter of the account floor and the importance interval applies, except that 1 always wins. POCs have no account floor; their cadence is importance alone. The reconnect task goes to the thread owner (section 5) with the cadence date as its deadline.
 
 ### 3b. Re-review of classified people
 
-Classification is not permanent. A relationship can change (prospect becomes client, client goes quiet, vendor becomes referrer). The triage routine may re-surface an already-classified person for review, but **only if the classification is at least 30 days old**, and only when something has changed since — a new thread, a deal stage change, or a cadence overdue by more than one interval. Re-reviews are proposed in the same table as new people, clearly marked "re-review", and follow the same stop-and-wait rule before any change.
+Classification is not permanent. A role can change (POC becomes the decision maker, vendor becomes a partner) and an account's status changes more often (Prospect signs, Customer goes quiet). The triage routine may re-surface an already-classified person or their company for review, but **only if the classification is at least 30 days old**, and only when something has changed since — a new thread, a deal stage change, or a cadence overdue by more than one interval. Re-reviews are proposed in the same table as new people, clearly marked "re-review", and follow the same stop-and-wait rule before any change.
 
 ## 4. Tasks
 
@@ -91,23 +106,27 @@ Classification is not permanent. A relationship can change (prospect becomes cli
 ## 7. Daily triage routine — what it may and may not do
 
 1. Scan Gmail (last ~60 days), skip internal and already-ignored people. Skip already-classified people unless they qualify for re-review under 3b or are overdue under 3a.
-2. Propose up to 10 with tag, importance, owner and email angle — new people first, then re-reviews and overdue reconnects. **Stop and wait.** No Attio writes before Karan replies.
+2. Propose up to 10 with relationship, company account type, importance, owner and email angle — new people first, then re-reviews and overdue reconnects. **Stop and wait.** No Attio writes before Karan replies.
 3. Before proposing, re-check Attio live — colleagues classify people during the day and the morning scan goes stale.
-4. After approval: set relationship / importance / ignore, merge obvious duplicate person records, ensure one open task per non-ignored person, create drafts as approved, and report a short table of what changed.
+4. After approval: set relationship / importance / ignore on the person, set `account_type` on the company if blank, merge obvious duplicate person records, ensure one open task per non-ignored person, create drafts as approved, and report a short table of what changed.
 5. Cold pitches with no Attio record: create the record with `ignore` = true and a one-line description so they stop resurfacing.
 6. Contact enrichment from signatures: when a phone number appears in someone's email signature and is missing from their Attio record, add it to `phone_numbers` (append, never overwrite an existing number). Do the same for job title and LinkedIn URL if the record is blank. Only from the person's own signature — never from a colleague's forward or a third party's mail. This is a low-risk write and does not need the stop-and-wait step; list it in the end-of-run summary.
 
 ## 8. Hygiene checks worth running weekly
 
-- People with `relationship` set, not ignored, and no `importance` (backfilled to zero on 11 Sep 2026; the ~90 ignored blanks were left as-is).
+- People with `relationship` set, not ignored, and no `importance`.
+- People with `relationship` set whose company has no `account_type`, or who have no company.
+- People with `ignore` = true and importance ≥ 2 (pick one).
 - People with importance ≥ 2 and no open task.
 - People with importance 1 who have an open task or a recent two-way thread (probably mis-scored).
 - People with more than one open task.
-- Future Prospects with no email interaction in 90 days (downgrade or Past Lead).
+- Prospect companies with no email interaction from anyone in 90 days (move to Past Lead).
+- Customer companies with no interaction in 6 months (move to Past Customer).
 - Duplicate people (same LinkedIn or same name at the same company).
 
 ## Changelog
 
+- 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2.
 - 0.4 (11 Sep 2026): importance simplified to 1–5 (6/7/8 retired, 1 renamed "No outreach needed"); cadence rule rewritten as relationship-floor + importance; task rule now applies at importance ≥ 2. All 50 non-ignored people with a relationship but no importance were scored the same day; 91 ignored blanks left alone.
 - 0.3 (11 Sep 2026): triage may enrich phone / title / LinkedIn from the person's own email signature (7.6).
 - 0.2 (11 Sep 2026): added reconnect cadence by relationship/importance (3a) and the 30-day re-review rule (3b); triage step 1–2 updated accordingly.
