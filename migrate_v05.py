@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """Rulebook v0.5 migration: role-only person.relationship + company.account_type.
 
 Usage:
-  python3 migrate_v05.py migration.csv            # dry run: prints what would change
-  python3 migrate_v05.py migration.csv --apply    # writes to Attio
-  python3 migrate_v05.py --archive-old --apply    # step 2, after verifying counts
+  /usr/bin/python3 migrate_v05.py migration.csv            # dry run: prints what would change
+  /usr/bin/python3 migrate_v05.py migration.csv --apply    # writes to Attio
+  /usr/bin/python3 migrate_v05.py --archive-old --apply    # step 2, after verifying counts
 
 Reads ATTIO_API_KEY from the env file next to this file. Only touches
 `relationship` on people and `account_type` on companies. Never changes
@@ -48,8 +48,13 @@ def options():
 def ensure_options(apply):
     have = options()
     for title in NEW:
-        if title in have:
+        if title in have and not have[title].get("is_archived"):
             print(f"option exists: {title}")
+        elif title in have:  # archived leftover from an older schema: revive, don't duplicate
+            if apply:
+                api("PATCH", f"/objects/people/attributes/relationship/options/{have[title]['id']['option_id']}",
+                    {"data": {"is_archived": False}})
+            print(f"{'un-archived' if apply else 'would un-archive'} option: {title}")
         elif apply:
             api("POST", "/objects/people/attributes/relationship/options", {"data": {"title": title}})
             print(f"option created: {title}")
