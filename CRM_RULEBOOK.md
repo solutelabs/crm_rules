@@ -8,9 +8,13 @@ Attio auto-creates a person for every email participant. That is fine; the job i
 
 Every person record must end in exactly one of two states within a day of first appearing: **classified** (a `relationship` value set, and the company's `account_type` set) or **ignored** (`ignore` = true). Nothing stays blank.
 
-`ignore` means "the triage routine never surfaces this person and nobody reaches out". It is not a softer "low priority" — that is importance 1. A person with `ignore` = true and importance ≥ 2 is a defect. The only relationship that is normally also ignored is Vendor (section 2).
+`ignore` means "the triage routine never surfaces this person and nobody reaches out". It is not a softer "low priority" — that is importance 1. A person with `ignore` = true and importance ≥ 2 is a defect. Ignored people with a relationship get importance 1 by default so the field is never blank. The only relationship that is normally also ignored is Vendor (section 2).
 
 Internal addresses (`@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`) are always `ignore`.
+
+`is_former_contact` = true means the person left that job (e.g. moved companies) and this record is their old work email. Keep the record until it is merged with the new one; it says nothing about the relationship.
+
+**Backlog.** Roughly 11,700 people created before September 2026 have neither a relationship nor `ignore`. They are never bulk-ignored. The backlog sweep (7.7) reviews them one at a time — who they are, whether they are still a potential fit — and classifies or ignores each individually.
 
 ## 2. Relationship and account status
 
@@ -53,7 +57,7 @@ Importance answers one question only: how often should we proactively reach out?
 | 2 | Low | yearly |
 | 1 | Lowest — no outreach needed | never (explicit opt-out) |
 
-Rules of thumb: Decision Maker at a Prospect with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. A POC we only talk to inside a project, or a Decision Maker at a settled Past Customer, is honestly a 1. Every non-ignored person with a `relationship` must have an importance; a blank importance is a defect.
+Rules of thumb: Decision Maker at a Prospect with a live scope = 5 (the open task carries the "ongoing" part). Prospect that paused ("next year") = 2 or 3 depending on deal size. A POC we only talk to inside a project, or a Decision Maker at a settled Past Customer, is honestly a 1. Every person with a `relationship` must have an importance; ignored people default to 1. A blank importance is a defect.
 
 History: until 11 Sep 2026 the scale ran 1–8, with 6 = "potential lead, ongoing", 7 = "Client POC, no interaction" and 8 = "Past client, no interaction". Those were retired because they duplicated `relationship`. Migration: 6 → 5, 7 and 8 → 1. Note: deleting a select option in Attio blanks the value on every record that had it — archive instead of delete.
 
@@ -111,22 +115,23 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 4. After approval: set relationship / importance / ignore on the person, set `account_type` on the company if blank, merge obvious duplicate person records, ensure one open task per non-ignored person, create drafts as approved, and report a short table of what changed.
 5. Cold pitches with no Attio record: create the record with `ignore` = true and a one-line description so they stop resurfacing.
 6. Contact enrichment from signatures: when a phone number appears in someone's email signature and is missing from their Attio record, add it to `phone_numbers` (append, never overwrite an existing number). Do the same for job title and LinkedIn URL if the record is blank. Only from the person's own signature — never from a colleague's forward or a third party's mail. This is a low-risk write and does not need the stop-and-wait step; list it in the end-of-run summary.
+7. Backlog sweep: in addition to the Gmail scan, take a batch of unclassified, un-ignored people from the backlog (most recent last interaction first), look at who each one is — company, title, what the threads were about — and propose classify-or-ignore per person in the same table as step 2. Same stop-and-wait rule. Batch size is whatever Karan can review that day; default 25.
 
 ## 8. Hygiene checks worth running weekly
 
-- People with `relationship` set, not ignored, and no `importance`.
+- People with `relationship` set and no `importance` (ignored ones just get 1).
 - People with `relationship` set whose company has no `account_type`, or who have no company.
 - People with `ignore` = true and importance ≥ 2 (pick one).
 - People with importance ≥ 2 and no open task.
 - People with importance 1 who have an open task or a recent two-way thread (probably mis-scored).
 - People with more than one open task.
-- Prospect companies with no email interaction from anyone in 90 days (move to Past Lead).
-- Customer companies with no interaction in 6 months (move to Past Customer).
+- Prospect companies with no email interaction from anyone in 90 days (propose Past Lead).
+- Customer companies with no interaction in 6 months, or an `engagement_end_date` older than 6 months (propose Past Customer). Account status changes are always proposed and confirmed by Karan, never flipped automatically.
 - Duplicate people (same LinkedIn or same name at the same company).
 
 ## Changelog
 
-- 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2.
+- 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2; ignored people default to importance 1 (78 backfilled). Backlog sweep added (7.7): the ~11,700 never-classified people are reviewed individually, not bulk-ignored. Account status changes are propose-only.
 - 0.4 (11 Sep 2026): importance simplified to 1–5 (6/7/8 retired, 1 renamed "No outreach needed"); cadence rule rewritten as relationship-floor + importance; task rule now applies at importance ≥ 2. All 50 non-ignored people with a relationship but no importance were scored the same day; 91 ignored blanks left alone.
 - 0.3 (11 Sep 2026): triage may enrich phone / title / LinkedIn from the person's own email signature (7.6).
 - 0.2 (11 Sep 2026): added reconnect cadence by relationship/importance (3a) and the 30-day re-review rule (3b); triage step 1–2 updated accordingly.
