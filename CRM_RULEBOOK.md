@@ -1,6 +1,6 @@
 # SoluteLabs CRM Rulebook (Attio)
 
-Version 0.5.2 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
+Version 0.5.4 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
 
 ## 1. Who gets a record
 
@@ -35,6 +35,8 @@ Two fields, two questions. **Who is this person to their company?** lives on the
 | Vendor | A supplier we use (CodeVyasa, TechMonarch, Growfusely, accountants) or an external contractor on a client's side. Also `ignore` = true unless someone owns the vendor relationship. |
 
 Vendor colleagues, cold pitches, recruiters, newsletters, SaaS notifications, event/sponsorship sales, M&A/valuation outreach, "co-founder wanted" mails: `ignore` = true, no relationship needed. Add a one-line `description` saying what the pitch was and the month, so nobody re-investigates.
+
+**Fraud.** An inbound lead that scopes fast, agrees a price on the first call and offers to pay by cheque or to overpay is treated as fraud until Finance confirms cleared funds. On confirmation: person `ignore` = true, importance 1, relationship cleared, company `ignore` = true and Past Lead, any deal moved to Lost with reason "Fraud / not real", and a `description` on both starting with "FRAUD:" so it is searchable. (Zargoza / Davis Baker, Sep 2026.)
 
 ### 2b. Company `account_type` — the account's status
 
@@ -123,7 +125,14 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 4. After approval: set relationship / importance / ignore on the person, set `account_type` on the company if blank, merge obvious duplicate person records, ensure one open task per non-ignored person, create drafts as approved, and report a short table of what changed.
 5. Cold pitches with no Attio record: create the record with `ignore` = true and a one-line description so they stop resurfacing.
 6. Contact enrichment from signatures: when a phone number appears in someone's email signature and is missing from their Attio record, add it to `phone_numbers` (append, never overwrite an existing number). Do the same for job title and LinkedIn URL if the record is blank. Only from the person's own signature — never from a colleague's forward or a third party's mail. This is a low-risk write and does not need the stop-and-wait step; list it in the end-of-run summary.
-7. Backlog sweep: in addition to the Gmail scan, take a batch of unclassified, un-ignored people from the backlog (most recent last interaction first), look at who each one is — company, title, what the threads were about — and propose classify-or-ignore per person in the same table as step 2. Same stop-and-wait rule. Batch size is whatever Karan can review that day; default 25.
+7. Backlog sweep: in addition to the Gmail scan, take a batch of unclassified, un-ignored people from the backlog (most recent last interaction first), look at who each one is — company, title, what the threads were about — and propose classify-or-ignore per person in the same table as step 2. Same stop-and-wait rule. Batch size is whatever Karan can review that day; default 25. People who already carry an importance but no relationship go first (38 such people on 14 Sep 2026).
+
+## 7a. Deals
+
+- Every deal has a stage and a company. A deal with neither is not a deal. The 195 stage-less imports were reviewed on 14 Sep 2026: company is a Books customer → Won; no company and no invoice → Lost, "No response / went cold".
+- Deal values are USD. Old imports sometimes carried INR figures as USD; when Karan confirms one, convert at 83 INR/USD. Value never decides Won or Lost.
+- Lost deals get `lost_reason_category` (Budget, Went in-house, Chose competitor, No response / went cold, Timing / paused, Scope mismatch, Candidate rejected, Fraud / not real, Other). "Candidate rejected" is for staffing deals where our developer failed the client's interview or test. The free-text `lost_reason` stays for detail.
+- `deal_won_date` is archived; Attio's stage history already records when a deal moved to Won.
 
 ## 8. Hygiene checks worth running weekly
 
@@ -138,8 +147,14 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 - Customer companies with no interaction in 6 months, or an `engagement_end_date` older than 6 months (propose Past Customer). Account status changes are always proposed and confirmed by Karan, never flipped automatically.
 - Duplicate people (same LinkedIn or same name at the same company).
 
+## 9. Fields we use
+
+People: `relationship`, `importance`, `ignore`, `description`, `is_former_contact`, `date_of_birth` (day/month), `interaction_channel_preference`, `inbound_lead`, plus Attio's own name, emails, phone, job title, LinkedIn, company. Companies: `account_type`, `customer_since`, `engagement_end_date`, `total_spend_range`, `account_manager` (executive sponsor), `ignore`, `description`, plus Attio's own domains, categories, location. Deals: stage, value, company, people, `lost_reason`, `lost_reason_category`, `man_efforts`, `timeline_weeks`. Everything else on these objects was archived on 12–14 Sep 2026 as duplicate or unused (Role in Account, Power Level, Key Contact, Existing Client POC, Company (POC), Postal Address, Meeting Mode, Industry, Location, POC, Account Tier, Strategic Value, Potential Revenue this Year, Deal Won Date). Archiving hides a field and keeps its data; un-archive if a real need appears.
+
 ## Changelog
 
+- 0.5.4 (14 Sep 2026): stage-less deals reviewed; INR-as-USD value rule; "Candidate rejected" lost-reason category.
+- 0.5.3 (14 Sep 2026): fraud rule (2a); deals rules and `lost_reason_category` (7a); "fields we use" (9) after archiving 14 duplicate or unused attributes; backlog sweep takes scored-but-unclassified people first.
 - 0.5.2 (14 Sep 2026): rule added: a new employer never inherits account status from a person who moved; 20 inherited statuses cleared, real clients noted on each person, Andrew Jones re-tagged Referrer, Nethues India merged into Nethues Technologies, Elevate Learning and yBuySell recorded as Past Customers.
 - 0.5.2 (14 Sep 2026): Zoho Books connected (three entities). Invoices are the evidence for `account_type`, `customer_since`, `engagement_end_date` and `total_spend_range`; the reconciliation proposes, Karan confirms. First full pass applied: 85 companies updated, NDTV merged into NDTV Profit, several Books-to-Attio mappings corrected and stored as overrides.
 - 0.5.1 (12 Sep 2026): task text and deadline must match the age of the last two-way exchange (section 4); no default 7-day chase on a months-old thread. Documented `date_of_birth` as day/month only with a placeholder year.
