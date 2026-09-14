@@ -1,6 +1,6 @@
 # SoluteLabs CRM Rulebook (Attio)
 
-Version 0.5.1 — 12 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
+Version 0.5.2 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
 
 ## 1. Who gets a record
 
@@ -13,6 +13,8 @@ Every person record must end in exactly one of two states within a day of first 
 Internal addresses (`@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`) are always `ignore`.
 
 `date_of_birth` holds the day and month only; the year is a placeholder because it is usually unknown. Don't "fix" it. A birthday note is a valid reconnect touch for anyone at importance 2 or higher.
+
+**When a person changes employer, the client relationship stays with the old company.** Attio re-points a person to whichever company their newest email belongs to. That never makes the new employer a Customer or Past Customer. Put a one-line note on the person ("Past client via X, now at Y") and leave the new company untyped unless it becomes a client in its own right. Lesson from 14 Sep 2026: 20 companies (Korn Ferry, Intertek, HexaHealth, Medanta and others) inherited Past Customer from people who had moved.
 
 `is_former_contact` = true means the person left that job (e.g. moved companies) and this record is their old work email. Keep the record until it is merged with the new one; it says nothing about the relationship.
 
@@ -44,6 +46,8 @@ Vendor colleagues, cold pitches, recruiters, newsletters, SaaS notifications, ev
 | Past Lead | A prospect that went cold or said no; keep only if worth a yearly ping. |
 | Partner | Co-selling or subcontracting partner. |
 | Vendor | A supplier. |
+
+**Zoho Books is the evidence for account status and spend.** `books_reconcile.py` (read-only) sums invoices per company across all three Books entities and proposes: Customer if invoiced in the last 6 months, otherwise Past Customer; `customer_since` from the first invoice; `engagement_end_date` from the last; `total_spend_range` from the total in USD at fixed rates. It only fills blanks or raises spend, never lowers; it never re-types a Partner or Vendor, and never reopens a Past Customer that has an end date (old invoices being cleared is not new work). Karan confirms every proposed change before it is written; confirmed Books-to-Attio name mappings live in `books_overrides.json`. Run weekly.
 
 Every company that has at least one classified person must have an `account_type`. A classified person at a company with a blank `account_type` is a defect. A person with no company (personal email, no employer known) gets a company record created from what we know, or stays `ignore`.
 
@@ -123,6 +127,7 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 
 ## 8. Hygiene checks worth running weekly
 
+- Books reconciliation diff (`books_reconcile.py`): any company where invoices disagree with Attio status, dates or spend.
 - People with `relationship` set and no `importance` (ignored ones just get 1).
 - People with `relationship` set whose company has no `account_type`, or who have no company.
 - People with `ignore` = true and importance ≥ 2 (pick one).
@@ -135,6 +140,8 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 
 ## Changelog
 
+- 0.5.2 (14 Sep 2026): rule added: a new employer never inherits account status from a person who moved; 20 inherited statuses cleared, real clients noted on each person, Andrew Jones re-tagged Referrer, Nethues India merged into Nethues Technologies, Elevate Learning and yBuySell recorded as Past Customers.
+- 0.5.2 (14 Sep 2026): Zoho Books connected (three entities). Invoices are the evidence for `account_type`, `customer_since`, `engagement_end_date` and `total_spend_range`; the reconciliation proposes, Karan confirms. First full pass applied: 85 companies updated, NDTV merged into NDTV Profit, several Books-to-Attio mappings corrected and stored as overrides.
 - 0.5.1 (12 Sep 2026): task text and deadline must match the age of the last two-way exchange (section 4); no default 7-day chase on a months-old thread. Documented `date_of_birth` as day/month only with a placeholder year.
 - 0.5 (12 Sep 2026): relationship rebuilt as role-only (Decision Maker, POC, Partner, Referrer, Vendor); current/past/prospect status moved to the company's `account_type`. Reason: the old values encoded both role and status, and status was never re-tagged — only 11 of 51 "Client - Founder / Owner" people sat at a company marked Customer, "Past Client" had become a catch-all for POCs, and 122 of 284 classified people were also ignored. Migration: Client - Founder / Owner and Past Client → Decision Maker or POC by job title; Client POC and Past client POC → POC; Future Prospect and Past Lead → Decision Maker or POC by title, company set to Prospect / Past Lead; CWX POC and the Google partner managers under Referrer → Partner; Vendor POC → Vendor. Old options archived, not deleted. `ignore` redefined as exclusive with importance ≥ 2; ignored people default to importance 1 (78 backfilled). Backlog sweep added (7.7): the ~11,700 never-classified people are reviewed individually, not bulk-ignored. Account status changes are propose-only. Importance 1 narrowed to "will never work with us"; Past Lead decision makers get a yearly floor. Applied 12 Sep 2026: 284 people re-tagged (Decision Maker 161, POC 91, Vendor 29, Partner 4); 67 companies given an account_type from the old person tags; 22 companies with only weak evidence were reviewed against Gmail and set to Prospect (4), Past Customer (10) or Past Lead (10); 21 ignored-but-scored people un-ignored; 78 ignored blanks set to 1; Role in Account, Power Level, Key Contact and existing_client_poc archived on people.
 - 0.4 (11 Sep 2026): importance simplified to 1–5 (6/7/8 retired, 1 renamed "No outreach needed"); cadence rule rewritten as relationship-floor + importance; task rule now applies at importance ≥ 2. All 50 non-ignored people with a relationship but no importance were scored the same day; 91 ignored blanks left alone.
