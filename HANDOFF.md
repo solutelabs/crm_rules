@@ -12,19 +12,7 @@ Where the CRM cleanup stands and what happens next. Written before a session res
 - Zargoza / Davis Baker flagged as cheque fraud; deal moved to Lost.
 
 ## Pending, in order
-1. **Deals: 195 stage-less deals** (all imported 28 Apr 2025), 10 at a time, newest first. Rule of thumb: company is a Books customer → Won; no company, no invoice → Lost, "No response / went cold". Batch 1 proposed, not yet answered:
-   | # | Deal | Value | Company | Proposal |
-   |---|---|---|---|---|
-   | 1 | uBuild - Launchpad | $0 | Launchpad App Development | Won |
-   | 2 | iOS Devs - Dedicated | $0 | Ivy Mobility | Won |
-   | 3 | iOS Developer - Heady | $0 | – | Lost |
-   | 4 | iOS Automation QA - Wire | $12,000 | Wire | Won |
-   | 5 | Zypp DevOps | $25,000 | – | Lost |
-   | 6 | Ziphii App | $20,000 | Ziphii | Won |
-   | 7 | Yash - Ivy - TL position | $40,300 | Ivy Mobility | Won |
-   | 8 | WorkOnGrid OCR App | $300,000 | – | Lost |
-   | 9 | Vrize RoR Devs | $24,000 | – | Lost |
-   | 10 | Volvo - Flutter Developers | $0 | – | Lost |
+1. **Deals: 195 stage-less deals** — DONE 14 Sep 2026 (70 Won, 125 Lost "No response / went cold"). Company links fixed on ~20 deals; INR-captured-as-USD values converted at 83 INR/USD where Karan confirmed. Duplicate companies to merge (Karan confirmed same client): Hello Bar -> Legion Works, Coinlion (empty) -> CoinLion, "Bqprime/ NDTV Profit" (empty) -> NDTV Profit.
 2. **Lost-reason mapping**: 82 Lost deals have free-text `lost_reason`; propose `lost_reason_category` per deal as a table, then apply.
 3. **Backlog sweep batch 3**: the 38 people with importance but no relationship first, then newest unclassified. Gmail review per person, propose, wait, write; one task per account via REST.
 4. **Weekly**: run `books_reconcile.py`, propose diffs; hygiene checks in rulebook §8.
