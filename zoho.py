@@ -5,9 +5,10 @@ ZOHO_CLIENT_ID=      # Zoho API console -> Self Client
 ZOHO_CLIENT_SECRET=
 ZOHO_REFRESH_TOKEN=  # generated once from the Self Client "Generate Code" flow
 ZOHO_DC=in           # data centre: in, com, eu, com.au ...
-ZOHO_ORG_ID=         # Books/Invoice organisation id (only for Finance apps)
+ZOHO_ORG_IDS=        # comma-separated Books organisation ids (filled by bootstrap)
 
-Usage: from zoho import api; api("books", "/invoices?status=unpaid")
+Usage: from zoho import api, orgs
+  for oid, name in orgs(): api("books", "/invoices?status=unpaid", org=oid)
 """
 import json, os, sys, time, urllib.parse, urllib.request, urllib.error
 
@@ -49,11 +50,16 @@ def token():
     return _token["value"]
 
 
-def api(product, path, method="GET", body=None):
+def orgs():
+    """[(organization_id, name), ...] for every Books org the token can see."""
+    return [(o["organization_id"], o["name"]) for o in api("books", "/organizations")["organizations"]]
+
+
+def api(product, path, method="GET", body=None, org=None):
     e = env()
     url = BASES[product].format(dc=e["ZOHO_DC"]) + path
-    if product in ("books", "invoice") and e.get("ZOHO_ORG_ID"):
-        url += ("&" if "?" in url else "?") + "organization_id=" + e["ZOHO_ORG_ID"]
+    if org:
+        url += ("&" if "?" in url else "?") + "organization_id=" + str(org)
     req = urllib.request.Request(url, method=method, data=json.dumps(body).encode() if body else None,
                                  headers={"Authorization": f"Zoho-oauthtoken {token()}", "Content-Type": "application/json"})
     try:
@@ -78,14 +84,11 @@ def bootstrap(code):
     if "refresh_token" not in j:
         sys.exit(f"bootstrap failed: {j}")
     _set_env("ZOHO_REFRESH_TOKEN", j["refresh_token"])
-    orgs = api("books", "/organizations")["organizations"]
-    for o in orgs:
+    found = api("books", "/organizations")["organizations"]
+    for o in found:
         print(f"org {o['organization_id']}: {o['name']} ({o.get('currency_code')})")
-    if len(orgs) == 1:
-        _set_env("ZOHO_ORG_ID", orgs[0]["organization_id"])
-        print("ZOHO_ORG_ID set")
-    else:
-        print("several orgs: set ZOHO_ORG_ID in the env file yourself")
+    _set_env("ZOHO_ORG_IDS", ",".join(o["organization_id"] for o in found))
+    print(f"ZOHO_ORG_IDS set ({len(found)} orgs)")
 
 
 def _set_env(key, value):
@@ -99,5 +102,9 @@ if __name__ == "__main__":
         bootstrap(sys.argv[2])
     else:                                                    # smoke test: /usr/bin/python3 zoho.py books
         p = sys.argv[1] if len(sys.argv) > 1 else "books"
-        probe = {"books": "/organizations", "invoice": "/organizations", "crm": "/org", "mail": "/accounts"}[p]
-        print(json.dumps(api(p, probe), indent=1)[:800])
+        if p == "books":
+            for oid, name in orgs():
+                print(oid, name)
+        else:
+            probe = {"invoice": "/organizations", "crm": "/org", "mail": "/accounts"}[p]
+            print(json.dumps(api(p, probe), indent=1)[:800])
