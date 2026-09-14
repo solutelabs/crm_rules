@@ -12,7 +12,7 @@ Where the CRM cleanup stands and what happens next. Written before a session res
 - Zargoza / Davis Baker flagged as cheque fraud; deal moved to Lost.
 
 ## Pending, in order
-1. **Deals: 195 stage-less deals** — DONE 14 Sep 2026 (70 Won, 125 Lost "No response / went cold"). Company links fixed on ~20 deals; INR-captured-as-USD values converted at 83 INR/USD where Karan confirmed. Duplicate companies to merge (Karan confirmed same client): Hello Bar -> Legion Works, Coinlion (empty) -> CoinLion, "Bqprime/ NDTV Profit" (empty) -> NDTV Profit.
+1. **Deals: 195 stage-less deals** — DONE 14 Sep 2026 (70 Won, 125 Lost "No response / went cold"). Company links fixed on ~20 deals; INR-captured-as-USD values converted at 83 INR/USD where Karan confirmed. Duplicate companies merged 14 Sep 2026 (new ids): Hello Bar -> Legion Works ccfde9b3-f4c7-4359-9236-aee219f3ecec, Coinlion -> CoinLion 7f727122-fc0e-41b6-85fd-6bfcf85bb7a9, Bqprime/NDTV Profit -> NDTV Profit b07e1e0c-576c-4bfd-aa7a-925145f74c91. Note: Attio merge creates a NEW record id; update `books_overrides.json` when a mapped company is merged.
 2. **Lost-reason mapping** — DONE 14 Sep 2026: 80 deals categorised (49 Budget, 15 No response, 5 Candidate rejected [new option], 3 Timing, 3 Scope, 2 Competitor, 1 In-house, 2 Other). 294 Lost deals have no reason text and no category; left blank.
    ~~Old:~~: 82 Lost deals have free-text `lost_reason`; propose `lost_reason_category` per deal as a table, then apply.
 3. **Backlog sweep batch 3**: the 38 people with importance but no relationship first, then newest unclassified. Gmail review per person, propose, wait, write; one task per account via REST.
