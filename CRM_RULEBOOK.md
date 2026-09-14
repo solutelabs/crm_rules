@@ -1,6 +1,6 @@
 # SoluteLabs CRM Rulebook (Attio)
 
-Version 0.5.3 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
+Version 0.5.4 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
 
 ## 1. Who gets a record
 
@@ -129,8 +129,9 @@ Classification is not permanent. A role can change (POC becomes the decision mak
 
 ## 7a. Deals
 
-- Every deal has a stage and a company. A deal with neither is not a deal; the backlog sweep reviews the 195 stage-less deals (as of 14 Sep 2026) in batches of 10 and sets Lost, Won or an open stage, or links the company.
-- Lost deals get `lost_reason_category` (Budget, Went in-house, Chose competitor, No response / went cold, Timing / paused, Scope mismatch, Fraud / not real, Other). The free-text `lost_reason` stays for detail.
+- Every deal has a stage and a company. A deal with neither is not a deal. The 195 stage-less imports were reviewed on 14 Sep 2026: company is a Books customer → Won; no company and no invoice → Lost, "No response / went cold".
+- Deal values are USD. Old imports sometimes carried INR figures as USD; when Karan confirms one, convert at 83 INR/USD. Value never decides Won or Lost.
+- Lost deals get `lost_reason_category` (Budget, Went in-house, Chose competitor, No response / went cold, Timing / paused, Scope mismatch, Candidate rejected, Fraud / not real, Other). "Candidate rejected" is for staffing deals where our developer failed the client's interview or test. The free-text `lost_reason` stays for detail.
 - `deal_won_date` is archived; Attio's stage history already records when a deal moved to Won.
 
 ## 8. Hygiene checks worth running weekly
@@ -152,6 +153,7 @@ People: `relationship`, `importance`, `ignore`, `description`, `is_former_contac
 
 ## Changelog
 
+- 0.5.4 (14 Sep 2026): stage-less deals reviewed; INR-as-USD value rule; "Candidate rejected" lost-reason category.
 - 0.5.3 (14 Sep 2026): fraud rule (2a); deals rules and `lost_reason_category` (7a); "fields we use" (9) after archiving 14 duplicate or unused attributes; backlog sweep takes scored-but-unclassified people first.
 - 0.5.2 (14 Sep 2026): rule added: a new employer never inherits account status from a person who moved; 20 inherited statuses cleared, real clients noted on each person, Andrew Jones re-tagged Referrer, Nethues India merged into Nethues Technologies, Elevate Learning and yBuySell recorded as Past Customers.
 - 0.5.2 (14 Sep 2026): Zoho Books connected (three entities). Invoices are the evidence for `account_type`, `customer_since`, `engagement_end_date` and `total_spend_range`; the reconciliation proposes, Karan confirms. First full pass applied: 85 companies updated, NDTV merged into NDTV Profit, several Books-to-Attio mappings corrected and stored as overrides.

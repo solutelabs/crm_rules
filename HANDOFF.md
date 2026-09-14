@@ -13,7 +13,8 @@ Where the CRM cleanup stands and what happens next. Written before a session res
 
 ## Pending, in order
 1. **Deals: 195 stage-less deals** — DONE 14 Sep 2026 (70 Won, 125 Lost "No response / went cold"). Company links fixed on ~20 deals; INR-captured-as-USD values converted at 83 INR/USD where Karan confirmed. Duplicate companies to merge (Karan confirmed same client): Hello Bar -> Legion Works, Coinlion (empty) -> CoinLion, "Bqprime/ NDTV Profit" (empty) -> NDTV Profit.
-2. **Lost-reason mapping**: 82 Lost deals have free-text `lost_reason`; propose `lost_reason_category` per deal as a table, then apply.
+2. **Lost-reason mapping** — DONE 14 Sep 2026: 80 deals categorised (49 Budget, 15 No response, 5 Candidate rejected [new option], 3 Timing, 3 Scope, 2 Competitor, 1 In-house, 2 Other). 294 Lost deals have no reason text and no category; left blank.
+   ~~Old:~~: 82 Lost deals have free-text `lost_reason`; propose `lost_reason_category` per deal as a table, then apply.
 3. **Backlog sweep batch 3**: the 38 people with importance but no relationship first, then newest unclassified. Gmail review per person, propose, wait, write; one task per account via REST.
 4. **Weekly**: run `books_reconcile.py`, propose diffs; hygiene checks in rulebook §8.
 5. Finance, informational: unpaid balances in Books — Launchpad $51k, CloudExperts $36k, Odds Now $33k, Amagi $17k, Roche $8.7k.
