@@ -1,6 +1,6 @@
 # SoluteLabs CRM Rulebook (Attio)
 
-Version 0.5.4 — 14 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
+Version 0.5.5 — 17 Sep 2026. Owner: Karan Shah. This file is the single source of truth for how people and tasks are classified in Attio, and what the daily triage routine is allowed to do. When a rule here and a habit in Attio disagree, fix the rule or fix the habit — don't leave both.
 
 ## 1. Who gets a record
 
@@ -10,7 +10,7 @@ Every person record must end in exactly one of two states within a day of first 
 
 `ignore` means "the triage routine never surfaces this person and nobody reaches out". It is not a softer "low priority" — that is importance 1. A person with `ignore` = true and importance ≥ 2 is a defect. Ignored people with a relationship get importance 1 by default so the field is never blank. The only relationship that is normally also ignored is Vendor (section 2).
 
-Internal addresses (`@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`) are always `ignore`.
+Internal addresses are always `ignore`: `@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`, and our outbound sending domains `@solutelabs.net`, `@solutelabs.agency`, `@solutelabs.co.in`, `@solutelab.in`, `@solute-lab.live`, `@aiwithsolute.com` (Instantly mailboxes and personas such as Mike Corleone or Nora Davis). Any new SoluteLabs lookalike sending domain is internal too; add it here.
 
 `date_of_birth` holds the day and month only; the year is a placeholder because it is usually unknown. Don't "fix" it. A birthday note is a valid reconnect touch for anyone at importance 2 or higher.
 
@@ -153,6 +153,7 @@ People: `relationship`, `importance`, `ignore`, `description`, `is_former_contac
 
 ## Changelog
 
+- 0.5.5 (17 Sep 2026): outbound sending domains (solutelabs.net, .agency, .co.in, solutelab.in, solute-lab.live, aiwithsolute.com) are internal; 16 alias records ignored.
 - 0.5.4 (14 Sep 2026): stage-less deals reviewed; INR-as-USD value rule; "Candidate rejected" lost-reason category.
 - 0.5.3 (14 Sep 2026): fraud rule (2a); deals rules and `lost_reason_category` (7a); "fields we use" (9) after archiving 14 duplicate or unused attributes; backlog sweep takes scored-but-unclassified people first.
 - 0.5.2 (14 Sep 2026): rule added: a new employer never inherits account status from a person who moved; 20 inherited statuses cleared, real clients noted on each person, Andrew Jones re-tagged Referrer, Nethues India merged into Nethues Technologies, Elevate Learning and yBuySell recorded as Past Customers.
