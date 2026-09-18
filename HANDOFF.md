@@ -30,6 +30,7 @@ Where the CRM cleanup stands and what happens next. Written before a session res
 5. Finance, informational: unpaid balances in Books — Launchpad $51k, CloudExperts $36k, Odds Now $33k, Amagi $17k, Roche $8.7k.
 
 ## How to resume
+- Sweep tooling in `sweep/`: `pull.py <workdir>` dumps every unclassified person to `<workdir>/unclassified.json` (~3 min); `build_batch.py N` (run inside that workdir) live-checks and writes `batchN.json` + three `groupN_*.txt` files; hand each group file to a read-only subagent with `review_prompt.txt`. Flow Karan likes: one question covering all clear-cut ignores, then one question per remaining person.
 - `/usr/bin/python3` (the python.org build has no certs). Attio key and Zoho creds are in `.env` (gitignored).
 - Re-pull live data; do not trust old CSVs. Karan reviews every write 10 at a time and answers per item.
 - Pushes to `main` are blocked: branch + `gh pr create`, Karan merges.

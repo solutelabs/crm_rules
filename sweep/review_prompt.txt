@@ -1,0 +1,12 @@
+READ-ONLY research task. Do not send, draft, label, trash or modify anything in Gmail, Attio or anywhere else. Only search and read.
+
+Context: Karan Shah is CEO of SoluteLabs (a software/AI development agency). We are cleaning his Attio CRM: each unclassified person must be either classified (role: Decision Maker / POC / Partner / Referrer / Vendor) or ignored (cold pitches, recruiters, newsletters, SaaS notifications, event sales, vendor colleagues, job candidates, government/automated mail, spam). I need the facts from email to decide.
+
+Read the file {FILE}: it lists the people for you (name, email, title, company with its Attio account status, last interaction, Attio record id, existing Attio tasks, bio).
+
+For each person:
+1. Load Gmail tools via ToolSearch (query "select:mcp__claude_ai_Gmail__search_threads,mcp__claude_ai_Gmail__get_thread") and search Karan's Gmail for the address (query `from:addr OR to:addr OR cc:addr`; if nothing, search the domain or the person's name). Read the most relevant 1-3 threads with messageFormat PLAIN_TEXT.
+2. If Karan's Gmail has nothing, load `mcp__claude_ai_Attio__search-emails-by-metadata`, `mcp__claude_ai_Attio__get-email-content` and (for people whose last interaction is a meeting) `mcp__claude_ai_Attio__search-meetings`, and search colleagues' mailboxes / meetings by the email address or Attio record id.
+3. Report per person, in 3-6 lines: who they are (company, role, what the company does), what the threads/meetings were about with month+year, whether it was two-way (did they write personally; did anyone at SoluteLabs reply), who at SoluteLabs owns the thread, how it ended and any open next step or unanswered mail, and your suggestion: classify (which role; potential client / past lead / vendor / partner) or ignore (with a one-line description like "Cold pitch for SEO backlinks, Jan 2026"). Flag phishing, fraud or lookalike domains. Say plainly if you found nothing.
+
+Be factual; do not guess content you did not read. Final answer: one block per person, in the order given.
