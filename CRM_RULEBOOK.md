@@ -10,7 +10,7 @@ Every person record must end in exactly one of two states within a day of first 
 
 `ignore` means "the triage routine never surfaces this person and nobody reaches out". It is not a softer "low priority" — that is importance 1. A person with `ignore` = true and importance ≥ 2 is a defect. Ignored people with a relationship get importance 1 by default so the field is never blank. The only relationship that is normally also ignored is Vendor (section 2).
 
-Internal addresses are always `ignore`: `@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`, and our outbound sending domains `@solutelabs.net`, `@solutelabs.agency`, `@solutelabs.co.in`, `@solutelab.in`, `@solute-lab.live`, `@aiwithsolute.com` (Instantly mailboxes and personas such as Mike Corleone or Nora Davis). Any new SoluteLabs lookalike sending domain is internal too; add it here.
+Internal addresses are always `ignore`: `@solutelabs.com`, `@solutelabs.us`, `@solutelabs.dev`, `@solutelab.com`, and our outbound sending domains `@solutelabs.net`, `@solutelabs.agency`, `@solutelabs.co.in`, `@solutelab.in`, `@solute-lab.live`, `@aiwithsolute.com`, `@solute-lab.tech` (Instantly mailboxes and personas such as Mike Corleone or Nora Davis). Any new SoluteLabs lookalike sending domain is internal too; add it here.
 
 `date_of_birth` holds the day and month only; the year is a placeholder because it is usually unknown. Don't "fix" it. A birthday note is a valid reconnect touch for anyone at importance 2 or higher.
 
