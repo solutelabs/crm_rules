@@ -1,4 +1,4 @@
-import json, sys, collections
+import os, json, sys, collections
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from migrate_v05 import api
 S = sys.argv[1]
