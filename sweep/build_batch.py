@@ -15,6 +15,7 @@ for x in P:
     v = r[0]["values"]
     if v["relationship"] or v["importance"] or (v["ignore"] and v["ignore"][0]["value"]): continue
     x["company"] = x["account_type"] = None
+    x["company_id"] = v["company"][0]["target_record_id"] if v["company"] else None  # live, not the pull (merges)
     if x["company_id"]:
         c = api("GET", "/objects/companies/records/" + x["company_id"])["data"]["values"]
         x["company"] = (c.get("name") or [{}])[0].get("value")
