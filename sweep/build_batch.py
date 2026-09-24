@@ -1,9 +1,9 @@
-# usage: build_batch.py N  -> batchN.json + groupN_{0,1,2}.txt; skips anyone in earlier batch files
+# usage: build_batch.py N [YYYY-MM-DD]  -> batchN.json (only people last seen before the date) + groupN_{0,1,2}.txt; skips anyone in earlier batch files
 import os, sys, json, glob, collections
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from migrate_v05 import api
 N = sys.argv[1]
-P = json.load(open("unclassified.json"))
+P = [x for x in json.load(open("unclassified.json")) if len(sys.argv) < 3 or (x["li_at"] or "") < sys.argv[2]]
 done = {x["id"] for f in glob.glob("batch*.json") for x in json.load(open(f))}
 ts = collections.Counter(x["li_at"] for x in P if x["li_type"] == "meeting")
 out = []
